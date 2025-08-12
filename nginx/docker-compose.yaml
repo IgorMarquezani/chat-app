@@ -1,0 +1,13 @@
+services:
+  web-server:
+    container_name: chat-app-nginx
+    image: chat-app-nginx
+    restart: always
+    ports:
+      - 8080:8080
+    networks:
+      - chat-app-network
+
+networks:
+  chat-app-network:
+    external: true
