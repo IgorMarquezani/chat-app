@@ -11,9 +11,9 @@ const Chat = () => {
   const [input, setInput] = useState('');
 
   const sendMessage = () => {
-    if (!input.trim()) return;
-    setMessages([...messages, { id: Date.now(), text: input, sender: 'me' }]);
-    setInput('');
+    if (!input.trim()) return
+    setMessages([...messages, { id: Date.now(), text: input, sender: 'me' }])
+    setInput('')
   };
 
   return (

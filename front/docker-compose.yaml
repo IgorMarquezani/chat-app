@@ -1,0 +1,15 @@
+services:
+  react:
+    container_name: chat-app-react
+    image: chat-app-react:latest
+    restart: always
+    volumes:
+      - ./:/app
+    ports:
+      - 3000:3000
+    networks:
+      - chat-app-network
+
+networks:
+  chat-app-network:
+    external: true
