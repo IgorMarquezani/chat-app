@@ -1,6 +1,7 @@
 services:
 
   db:
+    container_name: chat-app-db
     image: postgres
     restart: always
     ports:
@@ -8,3 +9,31 @@ services:
     environment:
       POSTGRES_PASSWORD: root 
       POSTGRES_USER: root 
+    networks:
+      - chat-app-network
+
+  back:
+    container_name: chat-app-api
+    image: chat-app-api:latest
+    restart: always
+    environment:
+      HOST: 0.0.0.0
+      PORT: 5000
+      POSTGRES_HOST: chat-app-db
+      POSTGRES_PORT: 5432
+      POSTGRES_PASSWORD: root 
+      POSTGRES_USER: root 
+      POSTGRES_DBNAME: root
+      POSTGRES_SSLMODE: disable
+      POSTGRES_TIMEZONE: Brazil/East
+      ON_PRODUCTION: "true"
+    ports:
+      - 5000:5000
+    networks:
+      - chat-app-network
+    depends_on: 
+      - db
+
+networks:
+  chat-app-network:
+    external: true

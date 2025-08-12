@@ -8,9 +8,10 @@ import (
 )
 
 func SetupRoutes(app *echo.Echo) {
-	app.GET("/status", func(c echo.Context) error {
+	app.GET("/api/status", func(c echo.Context) error {
 		return c.String(http.StatusOK, "server available")
 	})
 
-	app.POST("/users/signup", users.SignUp)
+	app.POST("/api/users/signup", users.SignUp)
+	app.POST("/api/users/login", users.LogIn)
 }

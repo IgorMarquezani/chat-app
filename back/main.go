@@ -2,7 +2,9 @@ package main
 
 import (
 	"app/internal/adapters/controllers"
+	cmiddleware "app/internal/adapters/controllers/middleware"
 	"app/internal/adapters/database"
+	"app/internal/core/models/session"
 	"app/internal/core/models/user"
 
 	"log"
@@ -11,11 +13,16 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
+func onProduction() bool {
+	return os.Getenv("ON_PRODUCTION") == "true"
+}
+
 func main() {
-	if err := godotenv.Load(); err != nil {
-		log.Fatal("error while loading .env: " + err.Error())
+	if err := godotenv.Load(); err != nil && !onProduction() {
+		log.Fatalln("error while loading .env: " + err.Error())
 	}
 
 	db, err := database.GetDbConnection()
@@ -23,9 +30,18 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	db.AutoMigrate(&user.User{})
+	if err := db.Exec(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`).Error; err != nil {
+		log.Fatalln(err)
+	}
+
+	db.AutoMigrate(&user.User{}, &session.Session{})
 
 	app := echo.New()
+
+	app.Use(middleware.Logger())
+	app.Use(cmiddleware.Authenticate())
+
+	app.IPExtractor = echo.ExtractIPFromXFFHeader()
 
 	controllers.SetupRoutes(app)
 
