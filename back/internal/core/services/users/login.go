@@ -43,35 +43,35 @@ func NewSignInSvc(
 	}
 }
 
-func (s *SignInSvc) SignIn(ctx context.Context, req SignInReq) services.APIMessage {
+func (s *SignInSvc) SignIn(ctx context.Context, req SignInReq) services.APIMessage[any] {
 	u, err := s.userRepo.SelectByEmail(ctx, req.Email)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return services.NewAPIMessage("invalid credentials",
+			return services.NewAPIMessage[any]("invalid credentials",
 				[]string{"e-mail not registered or invalid password"},
-				false, http.StatusBadRequest)
+				false, http.StatusBadRequest, nil)
 		}
 
-		return services.NewAPIMessage(
+		return services.NewAPIMessage[any](
 			"internal server error", nil,
-			false, http.StatusInternalServerError)
+			false, http.StatusInternalServerError, nil)
 	}
 
 	if !s.hasher.CompareHashAndPasswd(string(u.Password), req.Password) {
-		return services.NewAPIMessage(
+		return services.NewAPIMessage[any](
 			"invalid credentials",
 			[]string{"e-mail not registered or invalid password"},
-			false, http.StatusBadRequest)
+			false, http.StatusBadRequest, nil)
 	}
 
-	sess, err := s.sessionRepo.SelectByUserID(ctx, u.ID)
+	sessions, err := s.sessionRepo.SelectByUserID(ctx, u.ID)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return services.NewAPIMessage(
+		return services.NewAPIMessage[any](
 			"internal server error", nil,
-			false, http.StatusInternalServerError)
+			false, http.StatusInternalServerError, nil)
 	}
 
-	if sess.UserAgent == s.header.Get("User-Agent") {
+	for _, sess := range sessions {
 		t := time.Now().Add(time.Hour * 24)
 
 		s.sessionRepo.UpdateExpiresAtByKey(ctx, sess.Key, t)
@@ -84,12 +84,12 @@ func (s *SignInSvc) SignIn(ctx context.Context, req SignInReq) services.APIMessa
 			HttpOnly: true,
 		})
 
-		return services.NewAPIMessage(
-			"already logged in", nil, true, http.StatusAlreadyReported,
+		return services.NewAPIMessage[any](
+			"already logged in", nil, true, http.StatusAlreadyReported, nil,
 		)
 	}
 
-	sess = session.Session{
+	sess := session.Session{
 		UserId:    u.ID,
 		Key:       uuid.NewString(),
 		UserAgent: s.header.Get("User-Agent"),
@@ -98,16 +98,16 @@ func (s *SignInSvc) SignIn(ctx context.Context, req SignInReq) services.APIMessa
 	}
 
 	if len(sess.UserAgent) == 0 {
-		return services.NewAPIMessage(
+		return services.NewAPIMessage[any](
 			"missing User-Agent header", nil,
-			false, http.StatusBadRequest,
+			false, http.StatusBadRequest, nil,
 		)
 	}
 
 	if err := s.sessionRepo.Insert(ctx, &sess); err != nil {
-		return services.NewAPIMessage(
+		return services.NewAPIMessage[any](
 			"internal server error", nil,
-			false, http.StatusInternalServerError)
+			false, http.StatusInternalServerError, nil)
 	}
 
 	s.cookieSetter.SetCookie(&http.Cookie{
@@ -118,5 +118,5 @@ func (s *SignInSvc) SignIn(ctx context.Context, req SignInReq) services.APIMessa
 		HttpOnly: true,
 	})
 
-	return services.NewAPIMessage("logged in", nil, true, http.StatusOK)
+	return services.NewAPIMessage[any]("logged in", nil, true, http.StatusOK, nil)
 }

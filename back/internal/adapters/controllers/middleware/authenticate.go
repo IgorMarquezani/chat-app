@@ -30,8 +30,6 @@ func Authenticate() echo.MiddlewareFunc {
 
 			svc := users.NewIsLoggedSvc(c, repo)
 
-			println(c.Request().URL.Path)
-
 			msg := svc.IsLogged(c.Request().Context(), c.Request().URL.Path, ignoredPaths)
 
 			if msg.Status == http.StatusOK {

@@ -10,32 +10,31 @@ import (
 	"gorm.io/gorm"
 )
 
-var pool = sync.Pool{}
-
 var (
 	ErrUnexpected = errors.New("unexpected error")
 )
 
+var (
+	dbInstance *gorm.DB
+	dbOnce     sync.Once
+)
+
 func GetDbConnection() (*gorm.DB, error) {
-	v := pool.Get()
-	if v == nil {
-		db, err := Connect(os.Getenv("POSTGRES_HOST"), os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASSWORD"),
-			os.Getenv("POSTGRES_DBNAME"), os.Getenv("POSTGRES_PORT"), os.Getenv("POSTGRES_SSLMODE"),
-			os.Getenv("POSTGRES_TIMEZONE"))
+	var err error
 
-		if err == nil {
-			pool.Put(db)
-		}
+	dbOnce.Do(func() {
+		dbInstance, err = Connect(
+			os.Getenv("POSTGRES_HOST"),
+			os.Getenv("POSTGRES_USER"),
+			os.Getenv("POSTGRES_PASSWORD"),
+			os.Getenv("POSTGRES_DBNAME"),
+			os.Getenv("POSTGRES_PORT"),
+			os.Getenv("POSTGRES_SSLMODE"),
+			os.Getenv("POSTGRES_TIMEZONE"),
+		)
+	})
 
-		return db, err
-	}
-
-	db, ok := v.(*gorm.DB)
-	if !ok {
-		return db, ErrUnexpected
-	}
-
-	return db, nil
+	return dbInstance, err
 }
 
 func Connect(host, user, password, dbname, port, sslmode, timeZone string) (*gorm.DB, error) {

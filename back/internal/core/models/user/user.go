@@ -3,10 +3,10 @@ package user
 import "time"
 
 type User struct {
-	ID        uint32   `gorm:"primaryKey"`
-	Name      UserName `gorm:"not null"`
-	Email     Email    `gorm:"unique"`
-	Password  Password `gorm:"not null"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
+  ID        uint32   `gorm:"primaryKey" json:"id"`
+  Name      UserName `gorm:"not null" json:"name"`
+  Email     Email    `gorm:"unique" json:"email"`
+  Password  Password `gorm:"not null" json:"-"`
+	CreatedAt time.Time `json:"-"`
+	UpdatedAt time.Time `json:"-"`
 }

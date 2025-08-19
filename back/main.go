@@ -4,8 +4,14 @@ import (
 	"app/internal/adapters/controllers"
 	cmiddleware "app/internal/adapters/controllers/middleware"
 	"app/internal/adapters/database"
+	groupchat "app/internal/core/models/group-chat"
+	groupmessage "app/internal/core/models/group-message"
+	groupparticipant "app/internal/core/models/group-participant"
+	"app/internal/core/models/private-chat"
+	"app/internal/core/models/private-message"
 	"app/internal/core/models/session"
 	"app/internal/core/models/user"
+	userstate "app/internal/core/models/user-state"
 
 	"log"
 	"net"
@@ -34,7 +40,18 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	db.AutoMigrate(&user.User{}, &session.Session{})
+	if err := db.AutoMigrate(
+		&user.User{},
+		&privatechat.PrivateChat{},
+		&privatemessage.PrivateMessage{},
+		&groupchat.GroupChat{},
+		&groupparticipant.GroupParticipant{},
+		&groupmessage.GroupMessage{},
+		&userstate.UserState{},
+		&session.Session{},
+	); err != nil {
+		log.Fatalln(err)
+	}
 
 	app := echo.New()
 
@@ -45,8 +62,5 @@ func main() {
 
 	controllers.SetupRoutes(app)
 
-	host := os.Getenv("HOST")
-	port := os.Getenv("PORT")
-
-	app.Logger.Fatal(app.Start(net.JoinHostPort(host, port)))
+	app.Logger.Fatal(app.Start(net.JoinHostPort(os.Getenv("HOST"), os.Getenv("PORT"))))
 }

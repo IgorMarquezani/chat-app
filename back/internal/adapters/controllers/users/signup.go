@@ -30,12 +30,17 @@ func SignUp(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "internal server error")
 	}
 
-	repo, err := repository.NewUserRepository(db)
+	userRepo, err := repository.NewUserRepository(db)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "internal server error")
 	}
 
-	svc, err := users.NewAccountSvc(repo, &hasher.Hasher{})
+	userStateRepo, err := repository.NewUserStateRepository(db)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "internal server error")
+	}
+
+	svc, err := users.NewAccountSvc(userRepo, userStateRepo, &hasher.Hasher{})
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "internal server error")
 	}
