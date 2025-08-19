@@ -1,6 +1,9 @@
-const BtnSuccess = ({ disabled, disabledInnerHTML }) => {
+const BtnSuccess = ({ disabled, disabledInnerHTML, innerHTML, onClick }) => {
   if (disabledInnerHTML === undefined) {
     disabledInnerHTML = "Submit"
+  }
+  if (innerHTML === undefined) {
+    innerHTML = "Submit"
   }
 
   return (
@@ -9,8 +12,9 @@ const BtnSuccess = ({ disabled, disabledInnerHTML }) => {
         type="submit"
         className="bg-green-400 text-white mt-2 px-6 py-2 rounded hover:bg-green-500 transition"
         disabled={disabled}
+        onClick={onClick}
       >
-        {disabled ? disabledInnerHTML : "Submit"}
+        {disabled ? disabledInnerHTML : innerHTML}
       </button>
     </div>
 
