@@ -56,6 +56,15 @@ func (r *UserRepository) SelectByName(ctx context.Context, userName string) ([]u
 	return users, r.db.WithContext(ctx).Model(&user.User{}).Where("name ~* ?", regex).Scan(&users).Error
 }
 
+func (r *UserRepository) SelectJoinUserState(ctx context.Context, userID uint32) (user.FullUserInfo, error) {
+	var u user.FullUserInfo
+
+	return u, r.db.WithContext(ctx).Raw(`
+    select users.*, user_states.last_chat_id from users 
+    join user_states on users.id = user_states.user_id
+    where users.id = ?;`, userID).First(&u).Error
+}
+
 func (r *UserRepository) DeleteByID(ctx context.Context, id uint32) error {
 	return r.db.WithContext(ctx).Delete(&user.User{ID: id}).Error
 }

@@ -10,5 +10,6 @@ type UserRepository interface {
 	SelectByEmail(context.Context, string) (user.User, error)
 	SelectByName(context.Context, string) ([]user.User, error)
 	SelectByID(ctx context.Context, id uint32) (user.User, error)
+	SelectJoinUserState(ctx context.Context, userID uint32) (user.FullUserInfo, error)
 	DeleteByID(ctx context.Context, id uint32) error
 }

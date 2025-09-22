@@ -23,7 +23,7 @@ const createNewChat = (setChats) => {
 
     return resp.json()
   }).then((json) => {
-    if (json?.data) {
+    if (json?.data && json.data.chat_id?.length > 0) {
       console.log(json.data)
       setChats((prevChats) => [json.data, ...prevChats,])
     }
@@ -32,7 +32,7 @@ const createNewChat = (setChats) => {
   })
 }
 
-export default function Navbar({ chats, setChats }) {
+export default function Navbar({ setChats }) {
   const [userName, setUserName] = useState("");
   const [userID, setUserID] = useState(0);
   const [open, setOpen] = useState(false);
@@ -66,13 +66,6 @@ export default function Navbar({ chats, setChats }) {
   return (
     <div className="bg-gray-900 text-white p-3 font-bold">
       <NavigationMenu.Root className="bg-gray-900 text-white p-3 flex gap-4">
-        <NavigationMenu.List className="flex gap-4">
-          <NavigationMenu.Item>
-            <Link to="/about" className="hover:underline">
-              About
-            </Link>
-          </NavigationMenu.Item>
-        </NavigationMenu.List>
 
         <div className="relative w-100 ms-auto me-auto">
           <div className="flex gap-2">
@@ -122,10 +115,18 @@ export default function Navbar({ chats, setChats }) {
           )}
         </div>
 
+        <NavigationMenu.List clasName="flex gap-4">
+          <NavigationMenu.Item>
+            <Link to="/about" className="hover:underline">
+              About
+            </Link>
+          </NavigationMenu.Item>
+        </NavigationMenu.List>
+
         {/* Config Popover */}
         <Popover.Root>
           <Popover.Trigger asChild>
-            <button className="p-2 rounded-full hover:bg-gray-700 transition">
+            <button className="rounded-full hover:bg-gray-700 transition">
               <GearIcon className="w-5 h-5" />
             </button>
           </Popover.Trigger>

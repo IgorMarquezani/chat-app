@@ -17,6 +17,7 @@ func SetupRoutes(app *echo.Echo) {
 
 	app.POST("/api/users/signup", users.SignUp)
 	app.POST("/api/users/login", users.LogIn)
+	app.GET("/api/users/me", users.Me)
 	app.GET("/api/users/search/:name", users.Search)
 	app.PUT("/api/users/state", userstates.Update)
 

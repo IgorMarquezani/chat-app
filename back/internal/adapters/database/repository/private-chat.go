@@ -26,6 +26,12 @@ func (r *PrivateChatRepository) Insert(ctx context.Context, chat *privatechat.Pr
 	return r.db.WithContext(ctx).Create(&chat).Error
 }
 
+func (r *PrivateChatRepository) Select(ctx context.Context, chatID string) (privatechat.PrivateChat, error) {
+	var pc privatechat.PrivateChat
+
+	return pc, r.db.WithContext(ctx).Model(&pc).Where("id = ?", chatID).First(&pc).Error
+}
+
 func (r *PrivateChatRepository) SelectByUserID(ctx context.Context, userID uint32) ([]privatechat.UserPrivateChat, error) {
 	arr := make([]privatechat.UserPrivateChat, 0)
 
